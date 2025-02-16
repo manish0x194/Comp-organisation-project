@@ -79,7 +79,22 @@ def decimal_to_binary(n,type):
     else :
         return twos_complement(n)
 
-
+def dec_to_binJ(n):
+    binary = ''
+    if n< (-2**19) or n > 2**19 - 1:
+        return 'overflow'
+    if n < 0:
+        return twos_complement(n,20)
+    if n>=0:
+        if n == 0:
+            return '0'*20 
+        while n > 0:
+                remainder = n % 2  
+                binary = str(remainder) + binary 
+                n //= 2  
+        
+        binary = "1"*(20-len(binary)) + binary
+        return binary
         
 def twos_complement(value, bit_width=12):
 
@@ -239,9 +254,23 @@ def S_type_instruction(instruction):
 
 
 def J_type_instruction(instruction):
-    pass
+    instruction = instruction[1]
+    instruction = instruction.replace(' ','')
+    instruction = instruction.split(',') 
+    rd = str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+    opcode = str(riscv_opcodes['jal'])
+    if dec_to_binJ(int(instruction[1])) != 'overflow':
+        imm = str(dec_to_binJ(int(instruction[1])))
+    else:
+        return 'error'
+    complete = imm[19] + imm[0:10] + imm[10] + imm[11:19] + rd + opcode
+    return complete
+
+
 def B_type_instruction(instruction):
     pass
+
+
 def main(input_filepath,output_filepath):
     # f= open(input_filepath,'r')
     f= open("testcase.txt",'r')
