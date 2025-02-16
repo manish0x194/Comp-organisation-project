@@ -1,9 +1,11 @@
-A lightweight RISC-V simulator that decodes and executes RV32I machine code like a real CPU.
+RISC-V Assembler
+A simple assembler that converts RISC-V RV32I assembly code into binary machine code.
+
 Features
-Instruction Decoding: Supports RISC-V RV32I instruction set.
-Execution Engine: Simulates CPU registers, memory, and PC updates.
-Binary Loader: Loads pre-assembled RISC-V machine code.
+Supports RV32I instruction set.
+Converts assembly to 32-bit RISC-V machine code.
+Outputs binaries for simulation or execution.
 Usage
-Assemble RISC-V code using riscv-as or any assembler.
-Load the binary into the simulator.
-Step through execution and observe register/memory changes.
+Write RISC-V assembly code.
+Run the assembler to generate machine code.
+Use the binary with a simulator or emulator.
