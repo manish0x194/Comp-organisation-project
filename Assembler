@@ -23,7 +23,7 @@ riscv_opcodes = {
     'and': '0110011',    
     'xor': '0110011'     
 }
-# i am in
+
 riscv_funct3 = {
     'lw': '010',   
     'sw': '010',  
@@ -218,19 +218,7 @@ def R_type_instruction(instruction):
         print(output)
 
 
-    elif instruction[0].strip()=='xor':
-        opcode = str(riscv_opcodes['xor'])
-        func3 = str(riscv_funct3['xor'])
-        func7 = str(riscv_funct7['xor'])
-        instruction = instruction[1]
-        instruction= instruction.replace(' ','')
-        instruction= instruction.split(',')
-        rd= str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
-        rs1= str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
-        rs2= str(decimal_to_binary(ABI_encoding[instruction[2]],'R'))
-        output = func7 +' '+ rs2 + ' '+ rs1 +' '+ func3 +' '+ rd + ' '+ opcode
-        print(output)
-
+   
 
 def S_type_instruction(instruction):
     opcode = str(riscv_opcodes['sw'])
