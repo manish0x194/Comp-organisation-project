@@ -1,11 +1,10 @@
-RISC-V Assembler
-A simple assembler that converts RISC-V RV32I assembly code into binary machine code.
-
+A straightforward assembler that transforms RISC-V assembly code into binary machine code.
 Features
-Supports RV32I instruction set.
-Converts assembly to 32-bit RISC-V machine code.
-Outputs binaries for simulation or execution.
-Usage
-Write RISC-V assembly code.
-Run the assembler to generate machine code.
-Use the binary with a simulator or emulator.
+Compatible with the RV32I instruction set.
+Converts assembly into 32-bit RISC-V machine code.
+Outputs binary files for simulation or execution.
+
+How to Use
+Write your RISC-V assembly code.
+Execute the assembler to generate the corresponding machine code.
+Use the generated binary with a simulator or emulator.
