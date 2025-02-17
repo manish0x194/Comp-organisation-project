@@ -241,38 +241,39 @@ def S_type_instruction(instruction):
     output = imm[0:7] + ' '+rs2 +' '+ rs1 +' '+ func3 +' '+ imm[7:12] +' '+ opcode 
     return output
 
-
 def J_type_instruction(instruction):
     instruction = instruction[1]
     instruction = instruction.replace(' ','')
     instruction = instruction.split(',') 
     rd = str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
     opcode = str(riscv_opcodes['jal'])
-    if dec_to_binJ(int(instruction[1])) != 'overflow':
-        imm = str(dec_to_binJ(int(instruction[1])))
-    else:
-        return 'error'
-    complete = imm[19] + imm[0:10] + imm[10] + imm[11:19] + rd + opcode
+
+    imm = str(dec_to_binJB(int(instruction[1]),'J'))
+
+    imm = imm[::-1]
+    complete = imm[19] + imm[0:10] + imm[10] + imm[11:19] +' ' +rd +' '+ opcode
     return complete
-
-
 def B_type_instruction(instruction):
-    if instruction[1].split(',')[2].isdigit():
-        #  normal case
-        if instruction[0].strip()=='beq':
-            instruction = instruction[1].split(',')
-            opcode = str(riscv_opcodes['beq'])
-            func3 = str(riscv_funct3['beq'])
-            rs1= str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
-            rs2= str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
-            imm= str(decimal_to_binary(int(instruction[2]),'I'))
-            output = imm[0] + imm[2:8] + ' '+ rs2 +' '+ rs1 +' ' +func3 +' '+ imm[8:12] +  imm[1] + ' '+ opcode
-            print(output)
-
-    else :
-        #label case
-        pass
-
+    this function does not currently take labels into account 
+    k = instruction[0].strip()
+    instruction = instruction[1]
+    instruction = instruction.replace(' ','')
+    instruction = instruction.split(',')
+    rs1 = str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+    rs2 =  str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
+  
+    imm = str(dec_to_binJB(int(instruction[2]),'B'))
+    
+    funct3 = ''
+    if k == 'beq':
+        funct3 = riscv_funct3['beq']
+    elif k == 'bne':
+        funct3 = riscv_funct3['bne']
+    else:
+        funct3 = riscv_funct3['blt']
+    opcode= '1100011'
+    complete = imm[0] + imm[2:8] + ' '+rs2 +' '+ rs1 + ' ' +funct3+ ' ' +imm[8:] + imm[1] +' '+opcode
+    return complete
 
 def remove_label(instruction):
     label = instruction[0].strip()
