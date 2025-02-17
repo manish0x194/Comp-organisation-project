@@ -23,7 +23,7 @@ riscv_opcodes = {
     'and': '0110011',    
     'xor': '0110011'     
 }
-
+# i am in
 riscv_funct3 = {
     'lw': '010',   
     'sw': '010',  
