@@ -1,0 +1,299 @@
+ABI_encoding = {"zero": 0,"ra": 1,"sp": 2,"gp": 3,"tp": 4,"t0": 5,"t1": 6,"t2": 7,"s0": 8,"fp": 8,"s1": 9,"a0": 10,
+    "a1": 11, "a2": 12, "a3": 13, "a4": 14, "a5": 15, "a6": 16, "a7": 17, "s2": 18, "s3": 19, "s4": 20, "s5": 21,
+    "s6": 22,"s7": 23,"s8": 24,"s9": 25,"s10": 26,"s11": 27,"t3": 28,"t4": 29,"t5": 30,"t6": 31
+}
+    
+riscv_opcodes = {
+    'lw': '0000011',     
+    'sw': '0100011',  
+       
+    'addi': '0010011',   
+    'jalr': '1100111',   
+    'jal': '1101111',  
+
+    'beq': '1100011',   
+    'bne': '1100011',    
+    'blt': '1100011',   
+
+    'add': '0110011',    
+    'sub': '0110011',    
+    'slt': '0110011',    
+    'srl': '0110011',   
+    'or': '0110011',     
+    'and': '0110011',    
+    'xor': '0110011'     
+}
+
+riscv_funct3 = {
+    'lw': '010',   
+    'sw': '010',  
+
+    'addi': '000', 
+    'jalr': '000', 
+
+    'beq': '000',  
+    'bne': '001',  
+    'blt': '100',  
+
+    'add': '000',  
+    'sub': '000',  
+    'slt': '010',  
+    'srl': '101', 
+    'or': '110',   
+    'and': '111',  
+    'xor': '100'   
+}
+
+riscv_funct7 = {
+    'add': '0000000',  
+    'sub': '0100000',  
+    'slt': '0000000',  
+    'srl': '0000000',  
+    'or': '0000000',  
+    'and': '0000000',  
+    'xor': '0000000'  
+}
+
+
+
+def decimal_to_binary(n,type):
+    if n >=0 :
+        if n == 0:
+            return "0"*5 if type == 'R' else '0'*12
+        
+        binary = ""
+
+        while n > 0:
+            remainder = n % 2  
+            binary = str(remainder) + binary 
+            n //= 2  
+        
+        if type == 'I':
+            binary = "0"*(12-len(binary)) + binary
+        elif type == 'R':
+            binary = "0"*(5-len(binary)) + binary
+
+        
+        
+        return binary
+    else :
+        return twos_complement(n)
+
+
+        
+def twos_complement(value, bit_width=12):
+
+    twos_comp_value = (1 << bit_width) + value  
+
+    return format(twos_comp_value, f'0{bit_width}b')
+
+
+
+
+def I_type_instruction(instruction):
+    if instruction[0].strip() == 'lw' :
+        opcode = str(riscv_opcodes['lw'])
+        func3 = str(riscv_funct3['lw'])
+        instruction = instruction[1]
+        instruction= instruction.replace(' ','')
+        instruction = instruction.split(',')
+        rd = str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+        instruction = instruction[1]
+        y= instruction.index('(')
+        rs1= str(decimal_to_binary(ABI_encoding[instruction[y+1:-1]],'R'))
+        imm= str(decimal_to_binary(int(instruction[0:y]),'I'))
+        output = imm + ' '+rs1 +' '+ func3 +' '+ rd +' ' + opcode 
+        print(output)
+    
+    elif instruction[0].strip() =='addi':
+        opcode = str(riscv_opcodes['addi'])
+        func3 = str(riscv_funct3['addi'])
+        instruction = instruction[1]
+        instruction= instruction.replace(' ','')
+        instruction= instruction.split(',')
+        rd = str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+        rs1 = str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
+        imm= str(decimal_to_binary(int(instruction[2]),'I'))
+        output = imm + ' '+rs1 +' '+ func3 +' '+ rd +' ' + opcode 
+        print(output)
+    
+    elif instruction[0].strip()=='jalr' :
+        opcode = str(riscv_opcodes['jalr'])
+        func3 = str(riscv_funct3['jalr'])
+        instruction = instruction[1]
+        instruction= instruction.replace(' ','')
+        instruction= instruction.split(',')
+        rd = str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+        rs1 = str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
+        imm= str(decimal_to_binary(int(instruction[2]),'I'))
+        output = imm + ' '+rs1 +' '+ func3 +' '+ rd +' ' + opcode 
+        print(output)
+
+
+
+
+
+
+
+def R_type_instruction(instruction):
+    if instruction[0].strip()=='add':
+        opcode = str(riscv_opcodes['add'])
+        func3 = str(riscv_funct3['add'])
+        func7 = str(riscv_funct7['add'])
+        instruction = instruction[1]
+        instruction= instruction.replace(' ','')
+        instruction= instruction.split(',')
+        rd= str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+        rs1= str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
+        rs2= str(decimal_to_binary(ABI_encoding[instruction[2]],'R'))
+        output = func7 +' '+ rs2 + ' '+ rs1 +' '+ func3 +' '+ rd + ' '+ opcode
+        print(output)
+
+    
+    elif instruction[0].strip()=='sub':
+        opcode = str(riscv_opcodes['sub'])
+        func3 = str(riscv_funct3['sub'])
+        func7 = str(riscv_funct7['sub'])
+        instruction = instruction[1]
+        instruction= instruction.replace(' ','')
+        instruction= instruction.split(',')
+        rd= str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+        rs1= str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
+        rs2= str(decimal_to_binary(ABI_encoding[instruction[2]],'R'))
+        output = func7 +' '+ rs2 + ' '+ rs1 +' '+ func3 +' '+ rd + ' '+ opcode
+        print(output)
+
+    elif instruction[0].strip()=='slt':
+        opcode = str(riscv_opcodes['slt'])
+        func3 = str(riscv_funct3['slt'])
+        func7 = str(riscv_funct7['slt'])
+        instruction = instruction[1]
+        instruction= instruction.replace(' ','')
+        instruction= instruction.split(',')
+        rd= str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+        rs1= str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
+        rs2= str(decimal_to_binary(ABI_encoding[instruction[2]],'R'))
+        output = func7 +' '+ rs2 + ' '+ rs1 +' '+ func3 +' '+ rd + ' '+ opcode
+        print(output)
+
+    elif instruction[0].strip()=='srl':
+        opcode = str(riscv_opcodes['srl'])
+        func3 = str(riscv_funct3['srl'])
+        func7 = str(riscv_funct7['srl'])
+        instruction = instruction[1]
+        instruction= instruction.replace(' ','')
+        instruction= instruction.split(',')
+        rd= str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+        rs1= str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
+        rs2= str(decimal_to_binary(ABI_encoding[instruction[2]],'R'))
+        output = func7 +' '+ rs2 + ' '+ rs1 +' '+ func3 +' '+ rd + ' '+ opcode
+        print(output)
+
+    elif instruction[0].strip()=='or':
+        opcode = str(riscv_opcodes['or'])
+        func3 = str(riscv_funct3['or'])
+        func7 = str(riscv_funct7['or'])
+        instruction = instruction[1]
+        instruction= instruction.replace(' ','')
+        instruction= instruction.split(',')
+        rd= str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+        rs1= str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
+        rs2= str(decimal_to_binary(ABI_encoding[instruction[2]],'R'))
+        output = func7 +' '+ rs2 + ' '+ rs1 +' '+ func3 +' '+ rd + ' '+ opcode
+        print(output)
+
+    elif instruction[0].strip()=='and':
+        opcode = str(riscv_opcodes['and'])
+        func3 = str(riscv_funct3['and'])
+        func7 = str(riscv_funct7['and'])
+        instruction = instruction[1]
+        instruction= instruction.replace(' ','')
+        instruction= instruction.split(',')
+        rd= str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+        rs1= str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
+        rs2= str(decimal_to_binary(ABI_encoding[instruction[2]],'R'))
+        output = func7 +' '+ rs2 + ' '+ rs1 +' '+ func3 +' '+ rd + ' '+ opcode
+        print(output)
+
+
+    elif instruction[0].strip()=='xor':
+        opcode = str(riscv_opcodes['xor'])
+        func3 = str(riscv_funct3['xor'])
+        func7 = str(riscv_funct7['xor'])
+        instruction = instruction[1]
+        instruction= instruction.replace(' ','')
+        instruction= instruction.split(',')
+        rd= str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+        rs1= str(decimal_to_binary(ABI_encoding[instruction[1]],'R'))
+        rs2= str(decimal_to_binary(ABI_encoding[instruction[2]],'R'))
+        output = func7 +' '+ rs2 + ' '+ rs1 +' '+ func3 +' '+ rd + ' '+ opcode
+        print(output)
+    
+
+
+
+
+def S_type_instruction(instruction):
+    opcode = str(riscv_opcodes['sw'])
+    func3 = str(riscv_funct3['sw'])
+    instruction = instruction[1]
+    instruction= instruction.replace(' ','')
+    instruction = instruction.split(',')
+    rs2 = str(decimal_to_binary(ABI_encoding[instruction[0]],'R'))
+    instruction = instruction[1]
+    y= instruction.index('(')
+    rs1= str(decimal_to_binary(ABI_encoding[instruction[y+1:-1]],'R'))
+    
+
+    imm= str(decimal_to_binary(int(instruction[0:y]),'I'))
+    output = imm[0:7] + ' '+rs2 +' '+ rs1 +' '+ func3 +' '+ imm[7:12] +' '+ opcode 
+    print(output)
+
+
+def J_type_instruction(instruction):
+    pass
+
+def B_type_instruction(instruction):
+    pass
+
+
+
+def main(input_filepath, output_filepath):
+    f = open("testcase.txt", 'r')
+    instructions = f.readlines()
+    
+    def get_operands(instruction):
+        return instruction.split(' ')[1].split(',')
+    
+    for instruction in instructions:
+        instruction = instruction.strip()
+        if instruction == '':
+            continue
+
+        instruction_parts = instruction.split(' ', 1)
+
+        operands = get_operands(instruction)
+
+        for operand in operands:
+            if operand.strip() not in ABI_encoding and operand.strip() != 'zero':
+                print(f"Invalid register: {operand.strip()} in instruction: {instruction}")
+                break
+        
+        else:
+            if instruction_parts[0].strip() in ['lw', 'addi', 'jalr']:
+                I_type_instruction(instruction_parts)
+            elif instruction_parts[0].strip() == 'sw':
+                S_type_instruction(instruction_parts)
+            elif instruction_parts[0].strip() in ['beq', 'bne', 'blt']:
+                B_type_instruction(instruction_parts)
+            elif instruction_parts[0].strip() == 'jal':
+                J_type_instruction(instruction_parts)
+            elif instruction_parts[0].strip() in ['add', 'sub', 'slt', 'srl', 'or', 'and', 'xor']:
+                R_type_instruction(instruction_parts)
+            else:
+                print(f"Invalid Instruction: {instruction_parts[0].strip()}")
+    
+    f.close()
+
+
+main('a','b')
