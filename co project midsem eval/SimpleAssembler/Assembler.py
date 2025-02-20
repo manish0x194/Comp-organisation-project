@@ -316,14 +316,15 @@ def main():
     inputFile = sys.argv[-2]
     outputFile = sys.argv[-1]
     # a file.seek(0) need to be implemented at start of this functionn get no. of lines prresent then initialize a list of binary_list = [0]*length thiss willl work
+    
     file_length = 0
-    with open(inputFile,"r") as fo:
+    with open("testcase.txt","r") as fo:
         for line in fo:
             if line.strip() != '':
                 file_length += 1
     binary_list=[0]*(file_length)
     
-    f= open(inputFile,'r')
+    f= open("testcase.txt",'r')
     instructions = f.readlines()
     count = 0
     pc_count = 0
@@ -377,18 +378,35 @@ def main():
         buffer = 0
         if label_flag == 0:
             if instruction[0].strip() in ['lw','addi','jalr']:
-                k = I_type_instruction(instruction1)
+                try:
+                    k=I_type_instruction(instruction1)
+                except KeyError:
+                    k='error'
                 
             elif instruction[0].strip() == 'sw':
-                k=S_type_instruction(instruction1)
+                try:
+                    k=S_type_instruction(instruction1)
+                except KeyError:
+                    k='error'
                 
             elif instruction[0].strip() in ['beq','bne','blt']:
-                k=B_type_instruction(instruction1)
+                try:
+                    k=B_type_instruction(instruction1)
+                except KeyError:
+                    k='error'
             elif instruction[0].strip() == 'jal':
-                k=J_type_instruction(instruction1)
+                try:
+                    k=J_type_instruction(instruction1)
+                except KeyError:
+                    k='error'
 
             elif instruction[0].strip() in ['add','sub','slt','srl','or','and','xor']:
-                k=R_type_instruction(instruction1)
+                try:
+                    k=R_type_instruction(instruction1)
+                except KeyError:
+                    k='error'
+            else:
+                k='error'
             binary_list[count] = k
         count += 1
         pc_count += 4
@@ -430,16 +448,32 @@ def main():
                     #now feed this in k type j
                     bin_fetched = ''
                     if j[0].strip() in ['lw','addi','jalr']:
-                        bin_fetched=I_type_instruction(j)
+                        try:
+                            bin_fetched=I_type_instruction(instruction1)
+                        except KeyError:
+                            bin_fetched='error'
                     elif j[0].strip() == 'sw':
-                        bin_fetched=S_type_instruction(j)
+                        try:
+                            bin_fetched=S_type_instruction(instruction1)
+                        except KeyError:
+                            bin_fetched='error'
                     elif j[0].strip() in ['beq','bne','blt']:
-                        bin_fetched=B_type_instruction(j)
+                        try:
+                            bin_fetched=B_type_instruction(instruction1)
+                        except KeyError:
+                            bin_fetched='error'
                     elif j[0].strip() == 'jal':
-                
-                        bin_fetched=J_type_instruction(j)
+                        try:
+                            bin_fetched=J_type_instruction(instruction1)
+                        except KeyError:
+                            bin_fetched='error'
                     elif j[0].strip() in ['add','sub','slt','srl','or','and','xor']:
-                        bin_fetched=R_type_instruction(j)
+                        try:
+                            bin_fetched=R_type_instruction(instruction1)
+                        except KeyError:
+                            bin_fetched='error'
+                    else:
+                        bin_fetched = 'error'
                     binary_list[key]=bin_fetched
             
             try:
@@ -461,17 +495,33 @@ def main():
                         #now feed this in k type j
                         bin_fetched = ''
                         if j[0].strip() in ['lw','addi','jalr']:
-                            bin_fetched=I_type_instruction(j)
+                            try:
+                                bin_fetched=I_type_instruction(instruction1)
+                            except KeyError:
+                                bin_fetched='error'
                         elif j[0].strip() == 'sw':
-                            bin_fetched=S_type_instruction(j)
+                            try:
+                                bin_fetched=S_type_instruction(instruction1)
+                            except KeyError:
+                                bin_fetched='error'
                         elif j[0].strip() in ['beq','bne','blt']:
-                            bin_fetched=B_type_instruction(j)
+                            try:
+                                bin_fetched=B_type_instruction(instruction1)
+                            except KeyError:
+                                bin_fetched='error'
                         elif j[0].strip() == 'jal':
-                    
-                            bin_fetched=J_type_instruction(j)
+                            try:
+                                bin_fetched=J_type_instruction(instruction1)
+                            except KeyError:
+                                bin_fetched='error'
                         elif j[0].strip() in ['add','sub','slt','srl','or','and','xor']:
-                            bin_fetched=R_type_instruction(j)
-                        binary_list[key] = bin_fetched
+                            try:
+                                bin_fetched=R_type_instruction(instruction1)
+                            except KeyError:
+                                bin_fetched='error'
+                        else:
+                            bin_fetched = 'error'
+                        binary_list[key]=bin_fetched
             except ValueError:
                 if_label2 = line[-1]
                 key1 = 0
