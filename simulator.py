@@ -36,24 +36,38 @@ def R_type_instruction(instruction):
         rv[binary_to_decimal(rd)] = rv[binary_to_decimal(rs1)] + rv[binary_to_decimal(rs2)]
 
     def sub_instruction(rs1,rs2,rd):
-        pass
+        difference= rv[binary_to_decimal(rs1)] - rv[binary_to_decimal(rs2)]
+        rv[binary_to_decimal(rd)] = difference if difference >=0 else  2**32 + difference
 
     def slt_instruction(rs1,rs2,rd):
-        pass
+        rv[binary_to_decimal(rd)] = 1 if rv[binary_to_decimal(rs1)]< rv[binary_to_decimal(rs2)] else 0
+
+    def sll_instruction(rs1,rs2,rd):
+        shift = binary_to_decimal(decimal_to_binary(rv[binary_to_decimal(rs2)],32)[-5:])
+        y=  decimal_to_binary(rv[binary_to_decimal(rs1)],32)
+        rv[binary_to_decimal(rd)] = binary_to_decimal(  y[shift:] + '0'* shift)
+        
 
     def srl_instruction(rs1,rs2,rd):
-        pass
+        shift = binary_to_decimal(decimal_to_binary(rv[binary_to_decimal(rs2)],32)[-5:])
+        y=  decimal_to_binary(rv[binary_to_decimal(rs1)],32)
+        rv[binary_to_decimal(rd)] = binary_to_decimal('0'* shift + y[0:shift])
 
     def or_instruction(rs1,rs2,rd):
-        pass
+        rv[binary_to_decimal(rd)]= bin( rv[binary_to_decimal(rs1)] | rv[binary_to_decimal(rs2)],2)
+
 
     def and_instruction(rs1,rs2,rd):
-        pass
+        rv[binary_to_decimal(rd)]= bin( rv[binary_to_decimal(rs1)] & rv[binary_to_decimal(rs2)],2)
+
 
     if func3 =='010':
         slt_instruction(rs1,rs2,rd)
     elif func3 =='101':
         srl_instruction(rs1,rs2,rd)
+    elif func3 =='001':
+        sll_instruction(rs1,rs2,rd)
+        
     elif func3 =='110':
         or_instruction(rs1,rs2,rd)
     elif func3 =='111':
@@ -84,6 +98,8 @@ def I_type_instruction(instruction):
         rv[binary_to_decimal(rd)]= rv[binary_to_decimal(rs1)] + binary_to_decimal(imm)
 
     def jalr_instrcution(rs1,rd,imm):
+        # rd = pc +4
+        # pc = imm + rs1
         pass
     
     def load_instruction(rs1,rd,imm):
@@ -132,11 +148,13 @@ def decode_instruction(line):
 def main():
     f= open("input.txt",'r')
     s= f.readlines()
+    i=1
     for line in s:
         line = line.strip()
         decode_instruction(line)
+        print(i,rv)
+        i+=1
 
     f.close()
-    print(rv)
 
 main()
