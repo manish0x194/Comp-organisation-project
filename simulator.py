@@ -116,15 +116,39 @@ def I_type_instruction(instruction):
     
 
 def J_type_instruction(instruction):
-    imm = instruction[0:12]
-    rd = instruction[0:12]
+    imm = instruction[0] + instruction[12:20] + instruction[11] +instruction[1:11]
+    rd = instruction[20:25]
 
+    def jal_instruction(imm, rd):
+        pass
+
+    jal_instruction(imm, rd)
+
+    
 def B_type_instruction(instruction):
-    imm= instruction[0:7] + instruction[20:25]
+    imm= instruction[0] + instruction[24] + instruction[1:7] + instruction[20:24]
     rs2= instruction[7:12]
     rs1 = instruction[12:17]
-    func3 = imm= instruction[0:7] + instruction[20:25]
+    func3 = instruction[17:20]
 
+
+    def beq_instruction(rs1,rs2,imm):
+        pass
+
+    def bne_instruction(rs1,rs2,imm):
+        pass
+
+    def blt_instruction(rs1,rs2,imm):
+        pass
+
+    if func3 =='000':
+        beq_instruction(rs1,rs2,imm)
+    elif func3 =='001':
+        bne_instruction(rs1,rs2,imm)
+    elif func3 == '100':
+        blt_instruction(rs1,rs2,imm)
+    else :
+        return " invalid func3"
 
 
 def decode_instruction(line):
