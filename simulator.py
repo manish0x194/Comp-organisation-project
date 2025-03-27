@@ -2,27 +2,41 @@ rv = {i: 0 for i in range(32)}   # register_values
 
 rv[2] = 380  # stack pointer
 
+mv = {hex(j)[2:].upper(): 0 for j in range(0x00010000, 0x00010080, 4)} # memory _values
 
+def decimal_to_hex(num):
+    return hex(num)[2:].upper().zfill(8)
 
 def binary_to_decimal(binary_str):
     decimal = 0
     length = len(binary_str)
-    for i in range(0,length):
-        decimal+= 2**i * int(binary_str[length-i-1])
-    return decimal
+    if binary_str[0] =='0':
+        for i in range(0,length):
+            decimal+= 2**i * int(binary_str[length-i-1])
+        return decimal
+    else :
+        return int(binary_str, 2) - (1 << length)
+
+def twos_complement(value, bit_width):
+
+    twos_comp_value = (1 << bit_width) + value  
+
+    return format(twos_comp_value, f'0{bit_width}b')
 
 def decimal_to_binary( num, bits):
     binary=''
     if num==0:
         return '0'* bits
+    elif num>0:
+        while num > 0:
+            binary = str(num%2) + binary
+            num= num//2
+
+        binary = (bits - len(binary))*'0' + binary
+        return binary
     
-    while num > 0:
-        binary = str(num%2) + binary
-        num= num//2
-
-    binary = (bits - len(binary))*'0' + binary
-
-    return binary
+    else :
+        return twos_complement(num,bits)
 
 
 def R_type_instruction(instruction):
@@ -51,14 +65,17 @@ def R_type_instruction(instruction):
     def srl_instruction(rs1,rs2,rd):
         shift = binary_to_decimal(decimal_to_binary(rv[binary_to_decimal(rs2)],32)[-5:])
         y=  decimal_to_binary(rv[binary_to_decimal(rs1)],32)
-        rv[binary_to_decimal(rd)] = binary_to_decimal('0'* shift + y[0:shift])
+        rv[binary_to_decimal(rd)] = binary_to_decimal('0'* shift + y[0:-shift])
 
     def or_instruction(rs1,rs2,rd):
-        rv[binary_to_decimal(rd)]= bin( rv[binary_to_decimal(rs1)] | rv[binary_to_decimal(rs2)],2)
+        rv[binary_to_decimal(rd)]=  rv[binary_to_decimal(rs1)] | rv[binary_to_decimal(rs2)]
 
 
     def and_instruction(rs1,rs2,rd):
-        rv[binary_to_decimal(rd)]= bin( rv[binary_to_decimal(rs1)] & rv[binary_to_decimal(rs2)],2)
+        rv[binary_to_decimal(rd)]=  rv[binary_to_decimal(rs1)] & rv[binary_to_decimal(rs2)]
+
+    def xor_instruction(rs1,rs2,rd):
+        rv[binary_to_decimal(rd)]= rv[binary_to_decimal(rs1)] ^ rv[binary_to_decimal(rs2)]
 
 
     if func3 =='010':
@@ -66,8 +83,7 @@ def R_type_instruction(instruction):
     elif func3 =='101':
         srl_instruction(rs1,rs2,rd)
     elif func3 =='001':
-        sll_instruction(rs1,rs2,rd)
-        
+        sll_instruction(rs1,rs2,rd)    
     elif func3 =='110':
         or_instruction(rs1,rs2,rd)
     elif func3 =='111':
@@ -76,6 +92,8 @@ def R_type_instruction(instruction):
         add_instruction(rs1,rs2,rd)
     elif func3 == '000' and func7 =='0100000':
         sub_instruction(rs1,rs2,rd)
+    elif func3 =='100':
+        xor_instruction(rs1,rs2,rd)
     else :
         return "invalid func3"
 
@@ -86,6 +104,15 @@ def S_type_instruction(instruction):
     rs2= instruction[7:12]
     rs1 = instruction[12:17]
 
+    def store_instruction(rs1,rs2,imm):
+        memory_address = decimal_to_hex(binary_to_decimal(imm) + rv[binary_to_decimal(rs1)])
+        if memory_address in mv:
+            mv[memory_address] = rv[binary_to_decimal(rs2)]
+        else:
+            return "out of memory"
+
+    store_instruction(rs1,rs2,imm)
+
 
 
 def I_type_instruction(instruction):
@@ -93,6 +120,7 @@ def I_type_instruction(instruction):
     rs1 = instruction[12:17]
     rd = instruction[20:25]
     opcode = instruction[25:32]
+    func3 = instruction[17:20]
 
     def addi_instruction(rs1,rd,imm):
         rv[binary_to_decimal(rd)]= rv[binary_to_decimal(rs1)] + binary_to_decimal(imm)
@@ -100,9 +128,17 @@ def I_type_instruction(instruction):
     def jalr_instrcution(rs1,rd,imm):
         # rd = pc +4
         # pc = imm + rs1
+        # jump to updated pc
         pass
     
     def load_instruction(rs1,rd,imm):
+        memory_address = decimal_to_hex(binary_to_decimal(imm) + rv[binary_to_decimal(rs1)])
+        if memory_address in mv:
+            rv[binary_to_decimal(rd)] = mv[memory_address]
+        else :
+            return "out of memory"
+
+    def sltiu_instruction(rs1,rd,imm):
         pass
 
     if opcode =='1100111':
@@ -111,8 +147,11 @@ def I_type_instruction(instruction):
     elif opcode =='0000011':
         load_instruction(rs1,rd,imm)
     
-    elif opcode =='0010011':
+    elif opcode =='0010011' and func3 =='000':
         addi_instruction(rs1,rd,imm)
+
+    elif opcode =='0010011' and func3 =='011':
+        sltiu_instruction(rs1,rd,imm)
     
 
 def J_type_instruction(instruction):
@@ -120,6 +159,10 @@ def J_type_instruction(instruction):
     rd = instruction[20:25]
 
     def jal_instruction(imm, rd):
+        # rd = pc+4
+        # pc = pc +imm
+        # jump to updated pc
+        # Before jumping make the LSB=0 for PC.
         pass
 
     jal_instruction(imm, rd)
@@ -133,13 +176,27 @@ def B_type_instruction(instruction):
 
 
     def beq_instruction(rs1,rs2,imm):
-        pass
+        if rv[binary_to_decimal(rs1)] == rv[binary_to_decimal(rs2)]:
+            # pc = pc +imm
+            pass
 
     def bne_instruction(rs1,rs2,imm):
-        pass
+        if rv[binary_to_decimal(rs1)] != rv[binary_to_decimal(rs2)]:
+            # pc = pc +imm
+            pass
 
     def blt_instruction(rs1,rs2,imm):
-        pass
+        if rv[binary_to_decimal(rs1)] < rv[binary_to_decimal(rs2)]:
+            # pc = pc +imm
+            pass
+    def bltu_instruction(rs1,rs2,imm):
+        if rv[binary_to_decimal(rs1)] < rv[binary_to_decimal(rs2)]:
+            # pc = pc +imm
+            pass
+    def bgeu_instruction(rs1,rs2,imm):
+        if rv[binary_to_decimal(rs1)] >= rv[binary_to_decimal(rs2)]:
+            # pc = pc +imm
+            pass
 
     if func3 =='000':
         beq_instruction(rs1,rs2,imm)
@@ -147,6 +204,10 @@ def B_type_instruction(instruction):
         bne_instruction(rs1,rs2,imm)
     elif func3 == '100':
         blt_instruction(rs1,rs2,imm)
+    elif func3 == '110':
+        bltu_instruction(rs1,rs2,imm)
+    elif func3 == '111':
+        bgeu_instruction(rs1,rs2,imm)
     else :
         return " invalid func3"
 
