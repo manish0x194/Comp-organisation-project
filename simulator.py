@@ -3,7 +3,9 @@ rv = {i: 0 for i in range(32)}   # register_values
 
 rv[2] = 380  # stack pointer
 
-mv = {hex(j)[2:].upper(): 0 for j in range(0x00010000, 0x00010080, 4)} # memory _values
+mv = {hex(j)[2:].upper().zfill(8): 0 for j in range(0x00010000, 0x00010080, 4)}  #  memory _values
+
+
 
 pcv ={}  # pc values for respective instructions
 
@@ -156,7 +158,8 @@ def I_type_instruction(instruction):
     
     def load_instruction(rs1,rd,imm):
         global pc
-        memory_address = decimal_to_hex(binary_to_decimal(imm) + rv[binary_to_decimal(rs1)])
+        memory_address = decimal_to_hex(binary_to_decimal_2(imm) + rv[binary_to_decimal(rs1)])
+
         pc+=4
         if memory_address in mv:
             rv[binary_to_decimal(rd)] = mv[memory_address]
@@ -186,7 +189,7 @@ def J_type_instruction(instruction):
     def jal_instruction(imm, rd):
         global pc
         rv[binary_to_decimal(rd)]= pc+4
-        pc = pc + binary_to_decimal_2(imm)
+        pc = pc + binary_to_decimal_2(imm+'0')
 
         # rd = pc+4
         # pc = pc +imm
@@ -279,10 +282,10 @@ def main():
         if pc =='halt':
             break
         else :
+            print(pc)
             decode_instruction(pcv[pc])
             rv[0]=0
-            print(pc)
-            # print(j,' :',rv)
+            print(j,' :',rv)
             j+=1
         
 
@@ -291,3 +294,4 @@ def main():
 
 main()
 
+print(mv)
