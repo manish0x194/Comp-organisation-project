@@ -146,8 +146,9 @@ def I_type_instruction(instruction):
 
     def jalr_instrcution(rs1,rd,imm):
         global pc
-        rv[binary_to_decimal(rd)] = pc +4 
         pc = binary_to_decimal_2(imm) + rv[binary_to_decimal(rs1)]
+        rv[binary_to_decimal(rd)] = pc +4 
+
 
         # rd = pc +4
         # pc = imm + rs1
@@ -204,10 +205,13 @@ def B_type_instruction(instruction):
 
     def beq_instruction(rs1,rs2,imm):
         global pc
-        if rv[binary_to_decimal(rs1)] == rv[binary_to_decimal(rs2)]:
-            pc += binary_to_decimal_2(imm)
+        if  binary_to_decimal_2(imm) ==0:
+            pc = 'halt'
+        else:
+            if rv[binary_to_decimal(rs1)] == rv[binary_to_decimal(rs2)]:
+                pc += binary_to_decimal_2(imm)
 
-            # pc = pc +imm
+                # pc = pc +imm
 
     def bne_instruction(rs1,rs2,imm):
         global pc
@@ -272,9 +276,14 @@ def main():
         i+=1
 
     while pc  in pcv:
-        decode_instruction(pcv[pc])
-        print(j,' :',rv)
-        j+=1
+        if pc =='halt':
+            break
+        else :
+            decode_instruction(pcv[pc])
+            rv[0]=0
+            print(pc)
+            # print(j,' :',rv)
+            j+=1
         
 
     f.close()
