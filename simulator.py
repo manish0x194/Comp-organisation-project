@@ -1,13 +1,23 @@
+pc =0
 rv = {i: 0 for i in range(32)}   # register_values
 
 rv[2] = 380  # stack pointer
 
 mv = {hex(j)[2:].upper(): 0 for j in range(0x00010000, 0x00010080, 4)} # memory _values
 
+pcv ={}  # pc values for respective instructions
+
 def decimal_to_hex(num):
     return hex(num)[2:].upper().zfill(8)
 
 def binary_to_decimal(binary_str):
+    decimal = 0
+    length = len(binary_str)
+    for i in range(0,length):
+        decimal+= 2**i * int(binary_str[length-i-1])
+    return decimal
+
+def binary_to_decimal_2(binary_str):
     decimal = 0
     length = len(binary_str)
     if binary_str[0] =='0':
@@ -40,11 +50,13 @@ def decimal_to_binary( num, bits):
 
 
 def R_type_instruction(instruction):
+    global pc
     func7= instruction[0:7]
     rs2= instruction[7:12]
     rs1= instruction[12:17]
     func3= instruction[17:20]
     rd= instruction[20:25]
+    pc+=4
 
     def add_instruction(rs1,rs2,rd):
         rv[binary_to_decimal(rd)] = rv[binary_to_decimal(rs1)] + rv[binary_to_decimal(rs2)]
@@ -59,13 +71,16 @@ def R_type_instruction(instruction):
     def sll_instruction(rs1,rs2,rd):
         shift = binary_to_decimal(decimal_to_binary(rv[binary_to_decimal(rs2)],32)[-5:])
         y=  decimal_to_binary(rv[binary_to_decimal(rs1)],32)
-        rv[binary_to_decimal(rd)] = binary_to_decimal(  y[shift:] + '0'* shift)
+        rv[binary_to_decimal(rd)] = binary_to_decimal_2(  y[shift:] + '0'* shift)
         
 
     def srl_instruction(rs1,rs2,rd):
         shift = binary_to_decimal(decimal_to_binary(rv[binary_to_decimal(rs2)],32)[-5:])
-        y=  decimal_to_binary(rv[binary_to_decimal(rs1)],32)
-        rv[binary_to_decimal(rd)] = binary_to_decimal('0'* shift + y[0:-shift])
+        if shift ==0:
+            rv[binary_to_decimal(rd)]=rv[binary_to_decimal(rs1)]
+        else :
+            y=  decimal_to_binary(rv[binary_to_decimal(rs1)],32)
+            rv[binary_to_decimal(rd)] = binary_to_decimal_2('0'* shift + y[0:-shift])
 
     def or_instruction(rs1,rs2,rd):
         rv[binary_to_decimal(rd)]=  rv[binary_to_decimal(rs1)] | rv[binary_to_decimal(rs2)]
@@ -100,9 +115,11 @@ def R_type_instruction(instruction):
 
 
 def S_type_instruction(instruction):
+    global pc
     imm= instruction[0:7] + instruction[20:25]
     rs2= instruction[7:12]
     rs1 = instruction[12:17]
+    pc+=4
 
     def store_instruction(rs1,rs2,imm):
         memory_address = decimal_to_hex(binary_to_decimal(imm) + rv[binary_to_decimal(rs1)])
@@ -123,16 +140,23 @@ def I_type_instruction(instruction):
     func3 = instruction[17:20]
 
     def addi_instruction(rs1,rd,imm):
-        rv[binary_to_decimal(rd)]= rv[binary_to_decimal(rs1)] + binary_to_decimal(imm)
+        global pc
+        rv[binary_to_decimal(rd)]= rv[binary_to_decimal(rs1)] + binary_to_decimal_2(imm)
+        pc+=4
 
     def jalr_instrcution(rs1,rd,imm):
+        global pc
+        rv[binary_to_decimal(rd)] = pc +4 
+        pc = binary_to_decimal_2(imm) + rv[binary_to_decimal(rs1)]
+
         # rd = pc +4
         # pc = imm + rs1
         # jump to updated pc
-        pass
     
     def load_instruction(rs1,rd,imm):
+        global pc
         memory_address = decimal_to_hex(binary_to_decimal(imm) + rv[binary_to_decimal(rs1)])
+        pc+=4
         if memory_address in mv:
             rv[binary_to_decimal(rd)] = mv[memory_address]
         else :
@@ -159,11 +183,14 @@ def J_type_instruction(instruction):
     rd = instruction[20:25]
 
     def jal_instruction(imm, rd):
+        global pc
+        rv[binary_to_decimal(rd)]= pc+4
+        pc = pc + binary_to_decimal_2(imm)
+
         # rd = pc+4
         # pc = pc +imm
         # jump to updated pc
         # Before jumping make the LSB=0 for PC.
-        pass
 
     jal_instruction(imm, rd)
 
@@ -176,14 +203,18 @@ def B_type_instruction(instruction):
 
 
     def beq_instruction(rs1,rs2,imm):
+        global pc
         if rv[binary_to_decimal(rs1)] == rv[binary_to_decimal(rs2)]:
+            pc += binary_to_decimal_2(imm)
+
             # pc = pc +imm
-            pass
 
     def bne_instruction(rs1,rs2,imm):
+        global pc
         if rv[binary_to_decimal(rs1)] != rv[binary_to_decimal(rs2)]:
+            pc += binary_to_decimal_2(imm)
+
             # pc = pc +imm
-            pass
 
     def blt_instruction(rs1,rs2,imm):
         if rv[binary_to_decimal(rs1)] < rv[binary_to_decimal(rs2)]:
@@ -234,12 +265,20 @@ def main():
     f= open("input.txt",'r')
     s= f.readlines()
     i=1
+    j=1
     for line in s:
         line = line.strip()
-        decode_instruction(line)
-        print(i,rv)
+        pcv[4*(i-1)] = line
         i+=1
+
+    while pc  in pcv:
+        decode_instruction(pcv[pc])
+        print(j,' :',rv)
+        j+=1
+        
 
     f.close()
 
+
 main()
+
