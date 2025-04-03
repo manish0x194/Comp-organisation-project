@@ -236,7 +236,7 @@ while True: #in this while loop i want the effected registers value to be update
         try:
             #if 65536 <= S_type_instruction(line,ABI_encoding,ABI_encoding_flipped) <= 65536 + 124: 
             hex_dict[decimal_to_hex(S_type_instruction(line,ABI_encoding,ABI_encoding_flipped))] = ABI_encoding[ABI_encoding_flipped[binary_to_decimal(line[7:12])]]
-            print(decimal_to_hex(S_type_instruction(line,ABI_encoding,ABI_encoding_flipped)))
+            #print(decimal_to_hex(S_type_instruction(line,ABI_encoding,ABI_encoding_flipped)))
             #print(PC)
             PC = PC + 4
         except KeyError:
