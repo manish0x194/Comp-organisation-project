@@ -173,7 +173,7 @@ def B_type_instruction(instruction,ABI_encoding,ABI_encoding_flipped): #bool
 
 
 bin_list = []
-input_file = sys.argv[-2]
+input_file = sys.argv[1]
 f= open(input_file,'r')
 s= f.readlines()
 for line in s:
@@ -181,8 +181,8 @@ for line in s:
     bin_list.append(line)
 f.close()
 
-output_file = sys.argv[-1]
-#zbs = sys.argv[2]
+output_file = sys.argv[2]
+of3 = sys.argv[3]
 
 with open(output_file,'w+')as f1:
     f1.write('')
@@ -271,4 +271,3 @@ with open(output_file, 'a') as file1:
 
     
     
-
