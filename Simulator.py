@@ -247,6 +247,7 @@ while True:
         print("invalid opcode")
     buffer = 0
     #output_file = sys.argv[-1]
+    ABI_encoding["zero"] = 0 #i forgot resetting zero register
     with open(output_file, 'a') as file1:
         file1.write(twos_complement_32bit(PC)+ ' ')
         for i,j in ABI_encoding.items():
