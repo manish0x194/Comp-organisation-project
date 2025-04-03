@@ -1,6 +1,4 @@
-import os 
 import sys
-os.chdir(r'C:\Users\Manish\Downloads')
 
 ABI_encoding = {"zero": 0,"ra": 0,"sp": 380,"gp": 0,"tp": 0,"t0": 0,"t1": 0,"t2": 0,"s0": 0,"s1": 0,"a0": 0,
     "a1": 0, "a2": 0, "a3": 0, "a4": 0, "a5": 0, "a6": 0, "a7": 0, "s2": 0, "s3": 0, "s4": 0, "s5": 0,
@@ -170,10 +168,7 @@ def B_type_instruction(instruction,ABI_encoding,ABI_encoding_flipped): #bool
     
 
 
-#we can think like 
-#store a list with all those fking binaries in it
-# then get a pc for indexing and as that pc behaves manipulate those registers;ie in order to 
-#jump to a label (jump =abs-curr) abs 
+
 
 
 
@@ -195,12 +190,7 @@ with open(output_file,'w+')as f1:
 
 PC_prev=0
 PC=0
-while True: #in this while loop i want the effected registers value to be updated along with memory and pc
-    #loop will only break if PC equals PC_prev
-    #PC//4 would access the binary from bin_list
-    #now decode function has to decide what to do
-    #from non chaining instruction like s type and r type we can update the respective rs2 and rs1 in dictionary
-    #from chaining function 
+while True: 
     
     ABI_encoding["zero"] = 0
     PC_prev = PC
